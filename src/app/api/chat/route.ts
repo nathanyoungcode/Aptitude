@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { PrismaClient } from '@prisma/client'
 
 import { getSessionUser } from '@/lib/auth'
 import { callWebhook, handleApiError } from '@/lib/errors'
 import { chatRateLimit } from '@/lib/ratelimit'
+
+const prisma = new PrismaClient()
 
 const chatMessageSchema = z.object({
   message: z
@@ -44,47 +47,87 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { message, conversationId, context } = chatMessageSchema.parse(body)
 
-    // Call your AI service or n8n webhook
-    // const webhookResponse = await callWebhook(
-    //   process.env.N8N_WEBHOOK_URL + '/chat',
-    //   {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       'Authorization': `Bearer ${process.env.API_SECRET}`,
-    //     },
-    //     body: JSON.stringify({
-    //       message,
-    //       conversationId,
-    //       context,
-    //       userId: user.id,
-    //     }),
-    //   },
-    //   'Chat service',
-    //   30000, // 30s timeout
-    //   true    // Retry on 502/504
-    // )
-
-    // Mock response for now
-    const responses = [
-      'I understand your question. Let me help you with that.',
-      "That's a great point. Here's what I recommend...",
-      'Based on your request, I can suggest a few approaches.',
-      'Let me break this down for you step by step.',
-      "I'd be happy to help clarify that for you.",
-    ]
-
-    const mockResponse = {
-      id: `msg_${Date.now()}`,
-      message: responses[Math.floor(Math.random() * responses.length)],
-      conversationId: conversationId || `conv_${Date.now()}`,
-      timestamp: new Date().toISOString(),
+    // Find or create conversation
+    let conversation
+    if (conversationId) {
+      conversation = await prisma.conversation.findFirst({
+        where: { id: conversationId, userId: user.id }
+      })
+    }
+    
+    if (!conversation) {
+      conversation = await prisma.conversation.create({
+        data: {
+          userId: user.id,
+          title: message.substring(0, 50) + (message.length > 50 ? '...' : '')
+        }
+      })
     }
 
-    // Simulate processing delay
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    // Save user message
+    const userMessage = await prisma.message.create({
+      data: {
+        content: message,
+        role: 'USER',
+        conversationId: conversation.id,
+        userId: user.id,
+        metadata: context ? JSON.stringify(context) : null
+      }
+    })
 
-    return NextResponse.json(mockResponse)
+    // Call your n8n webhook
+    const webhookResponse = await callWebhook(
+      process.env.N8N_WEBHOOK_URL + '/chat',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.API_SECRET}`,
+          'X-User-ID': user.id,
+        },
+        body: JSON.stringify({
+          message,
+          conversationId: conversation.id,
+          context,
+          userId: user.id,
+          userEmail: user.email,
+        }),
+      },
+      'n8n Chat service',
+      30000, // 30s timeout
+      true    // Retry on 502/504
+    )
+
+    // Save assistant response
+    const assistantMessage = await prisma.message.create({
+      data: {
+        content: webhookResponse.message || 'Sorry, I could not process your request.',
+        role: 'ASSISTANT',
+        conversationId: conversation.id,
+        userId: user.id,
+        metadata: webhookResponse.metadata ? JSON.stringify(webhookResponse.metadata) : null
+      }
+    })
+
+    // Return the response
+    const response = {
+      userMessage: {
+        id: userMessage.id,
+        message: userMessage.content,
+        role: userMessage.role,
+        timestamp: userMessage.createdAt.toISOString(),
+      },
+      assistantMessage: {
+        id: assistantMessage.id,
+        message: assistantMessage.content,
+        role: assistantMessage.role,
+        timestamp: assistantMessage.createdAt.toISOString(),
+      },
+      conversationId: conversation.id,
+      ...webhookResponse, // Include any additional data from n8n
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     return handleApiError(error)
   }

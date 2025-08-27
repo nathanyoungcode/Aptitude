@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MoreVertical, Paperclip, Send } from 'lucide-react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -9,66 +9,132 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
-const mockMessages = [
-  {
-    id: 1,
-    sender: 'Assistant',
-    message: 'Hello! How can I help you today?',
-    timestamp: '10:30 AM',
-    isBot: true,
-  },
-  {
-    id: 2,
-    sender: 'You',
-    message: 'I need help setting up my dashboard',
-    timestamp: '10:31 AM',
-    isBot: false,
-  },
-  {
-    id: 3,
-    sender: 'Assistant',
-    message:
-      "I'd be happy to help you set up your dashboard. What specific features are you looking to configure?",
-    timestamp: '10:31 AM',
-    isBot: true,
-  },
-]
+interface Message {
+  id: string
+  content: string
+  role: 'USER' | 'ASSISTANT' | 'SYSTEM'
+  timestamp: string
+}
+
+interface Conversation {
+  id: string
+  title: string | null
+  messages: Message[]
+  createdAt: string
+  updatedAt: string
+}
+
+interface ConversationListItem {
+  id: string
+  title: string | null
+  messageCount: number
+  lastMessage: {
+    content: string
+    timestamp: string
+    role: string
+  } | null
+  createdAt: string
+  updatedAt: string
+}
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState(mockMessages)
+  const [conversations, setConversations] = useState<ConversationListItem[]>([])
+  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null)
   const [newMessage, setNewMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return
+  // Load conversations on mount
+  useEffect(() => {
+    loadConversations()
+  }, [])
 
-    const userMessage = {
-      id: messages.length + 1,
-      sender: 'You',
-      message: newMessage,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      isBot: false,
+  const loadConversations = async () => {
+    try {
+      const response = await fetch('/api/conversations')
+      if (response.ok) {
+        const data = await response.json()
+        setConversations(data.conversations)
+      }
+    } catch (error) {
+      console.error('Failed to load conversations:', error)
     }
+  }
 
-    setMessages([...messages, userMessage])
+  const loadConversation = async (conversationId: string) => {
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}`)
+      if (response.ok) {
+        const conversation = await response.json()
+        setCurrentConversation(conversation)
+      }
+    } catch (error) {
+      console.error('Failed to load conversation:', error)
+    }
+  }
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || isLoading) return
+
+    setIsLoading(true)
+    setError(null) // Clear any previous errors
+    const messageText = newMessage
     setNewMessage('')
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage = {
-        id: messages.length + 2,
-        sender: 'Assistant',
-        message: 'Thanks for your message! This is a simulated response.',
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageText,
+          conversationId: currentConversation?.id,
         }),
-        isBot: true,
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        
+        // If this is a new conversation, load it
+        if (!currentConversation || currentConversation.id !== data.conversationId) {
+          await loadConversation(data.conversationId)
+          await loadConversations() // Refresh conversation list
+        } else {
+          // Update current conversation with new messages
+          setCurrentConversation(prev => prev ? {
+            ...prev,
+            messages: [
+              ...prev.messages,
+              {
+                id: data.userMessage.id,
+                content: data.userMessage.message,
+                role: 'USER' as const,
+                timestamp: data.userMessage.timestamp,
+              },
+              {
+                id: data.assistantMessage.id,
+                content: data.assistantMessage.message,
+                role: 'ASSISTANT' as const,
+                timestamp: data.assistantMessage.timestamp,
+              }
+            ]
+          } : null)
+        }
+      } else {
+        setError('Failed to send message. Please try again.')
+        setNewMessage(messageText) // Restore the message
       }
-      setMessages((prev) => [...prev, botMessage])
-    }, 1000)
+    } catch (error) {
+      setError('Network error. Please check your connection.')
+      setNewMessage(messageText) // Restore the message
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const startNewConversation = () => {
+    setCurrentConversation(null)
   }
 
   return (
@@ -81,6 +147,9 @@ export default function ChatPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={startNewConversation}>
+            New Chat
+          </Button>
           <Button variant="outline" size="icon">
             <MoreVertical className="h-4 w-4" />
           </Button>
@@ -94,14 +163,28 @@ export default function ChatPage() {
             <CardTitle className="text-base">Conversations</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-              <p className="text-sm font-medium">Current Chat</p>
-              <p className="text-xs text-muted-foreground">Dashboard setup</p>
-            </div>
-            <div className="p-2 rounded-lg hover:bg-muted cursor-pointer">
-              <p className="text-sm">Previous Chat</p>
-              <p className="text-xs text-muted-foreground">API integration</p>
-            </div>
+            {conversations.length === 0 ? (
+              <p className="text-sm text-muted-foreground p-2">No conversations yet</p>
+            ) : (
+              conversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  onClick={() => loadConversation(conv.id)}
+                  className={`p-2 rounded-lg cursor-pointer ${
+                    currentConversation?.id === conv.id
+                      ? 'bg-primary/10 border border-primary/20'
+                      : 'hover:bg-muted'
+                  }`}
+                >
+                  <p className="text-sm font-medium truncate">
+                    {conv.title || 'New Conversation'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {conv.lastMessage?.content || 'No messages'}
+                  </p>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -129,41 +212,74 @@ export default function ChatPage() {
           <CardContent className="p-0">
             {/* Messages */}
             <div className="h-[400px] overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
-                >
-                  <div
-                    className={`flex max-w-[80%] ${
-                      message.isBot ? 'flex-row' : 'flex-row-reverse'
-                    }`}
-                  >
-                    <Avatar className="h-6 w-6 mt-1">
-                      <AvatarFallback className="text-xs">
-                        {message.isBot ? 'AI' : 'U'}
-                      </AvatarFallback>
-                    </Avatar>
+              {!currentConversation ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-muted-foreground">Select a conversation or start a new one</p>
+                </div>
+              ) : (
+                currentConversation.messages.map((message) => {
+                  const isBot = message.role === 'ASSISTANT'
+                  const timestamp = new Date(message.timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                  
+                  return (
                     <div
-                      className={`mx-2 p-3 rounded-lg ${
-                        message.isBot
-                          ? 'bg-muted'
-                          : 'bg-primary text-primary-foreground'
-                      }`}
+                      key={message.id}
+                      className={`flex ${isBot ? 'justify-start' : 'justify-end'}`}
                     >
-                      <p className="text-sm">{message.message}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          message.isBot ? 'text-muted-foreground' : 'opacity-70'
+                      <div
+                        className={`flex max-w-[80%] ${
+                          isBot ? 'flex-row' : 'flex-row-reverse'
                         }`}
                       >
-                        {message.timestamp}
-                      </p>
+                        <Avatar className="h-6 w-6 mt-1">
+                          <AvatarFallback className="text-xs">
+                            {isBot ? 'AI' : 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div
+                          className={`mx-2 p-3 rounded-lg ${
+                            isBot
+                              ? 'bg-muted'
+                              : 'bg-primary text-primary-foreground'
+                          }`}
+                        >
+                          <p className="text-sm">{message.content}</p>
+                          <p
+                            className={`text-xs mt-1 ${
+                              isBot ? 'text-muted-foreground' : 'opacity-70'
+                            }`}
+                          >
+                            {timestamp}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="flex flex-row max-w-[80%]">
+                    <Avatar className="h-6 w-6 mt-1">
+                      <AvatarFallback className="text-xs">AI</AvatarFallback>
+                    </Avatar>
+                    <div className="mx-2 p-3 rounded-lg bg-muted">
+                      <p className="text-sm">Thinking...</p>
                     </div>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className="p-4 border-t border-b bg-destructive/10 text-destructive text-sm">
+                {error}
+              </div>
+            )}
 
             {/* Input */}
             <div className="border-t p-4">
@@ -182,10 +298,11 @@ export default function ChatPage() {
                     }
                   }}
                   className="flex-1"
+                  disabled={isLoading}
                 />
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() || isLoading}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
