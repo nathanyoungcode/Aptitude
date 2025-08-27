@@ -1,7 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Activity, BarChart3, TrendingUp, Users } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { BarChart3, Users, TrendingUp, Activity } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const stats = [
   {
@@ -41,7 +42,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your app.
+            Welcome back! Here&apos;s what&apos;s happening with your app.
           </p>
         </div>
         <div className="flex gap-2">
@@ -65,7 +66,7 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
                 <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <Badge 
+                  <Badge
                     variant={stat.trend === 'up' ? 'default' : 'destructive'}
                     className="text-xs"
                   >
@@ -103,10 +104,26 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { user: 'John Doe', action: 'created a new project', time: '2 minutes ago' },
-                { user: 'Sarah Wilson', action: 'updated dashboard', time: '5 minutes ago' },
-                { user: 'Mike Chen', action: 'joined the team', time: '1 hour ago' },
-                { user: 'Emma Davis', action: 'completed task', time: '2 hours ago' },
+                {
+                  user: 'John Doe',
+                  action: 'created a new project',
+                  time: '2 minutes ago',
+                },
+                {
+                  user: 'Sarah Wilson',
+                  action: 'updated dashboard',
+                  time: '5 minutes ago',
+                },
+                {
+                  user: 'Mike Chen',
+                  action: 'joined the team',
+                  time: '1 hour ago',
+                },
+                {
+                  user: 'Emma Davis',
+                  action: 'completed task',
+                  time: '2 hours ago',
+                },
               ].map((activity, i) => (
                 <div key={i} className="flex items-center space-x-4">
                   <div className="w-2 h-2 rounded-full bg-primary" />

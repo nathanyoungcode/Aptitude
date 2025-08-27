@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+
 import { getSessionUser } from '@/lib/auth'
+import { callWebhook, handleApiError } from '@/lib/errors'
 import { analyticsRateLimit } from '@/lib/ratelimit'
-import { handleApiError, callWebhook } from '@/lib/errors'
 
 const analyticsQuerySchema = z.object({
-  timeframe: z.enum(['24h', '7d', '30d', '90d'], {
-    errorMap: () => ({ message: 'Timeframe must be one of: 24h, 7d, 30d, 90d' })
-  }).optional().default('7d'),
+  timeframe: z.enum(['24h', '7d', '30d', '90d']).optional().default('7d'),
   metrics: z.array(z.string().min(1, 'Metric name cannot be empty')).optional(),
 })
 
@@ -15,23 +14,25 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication first
     const user = await getSessionUser(request)
-    
+
     // Rate limit check
-    const { success, remaining, reset } = await analyticsRateLimit.limit(user.id)
-    
+    const { success, remaining, reset } = await analyticsRateLimit.limit(
+      user.id
+    )
+
     if (!success) {
       return NextResponse.json(
         { error: 'Too many analytics requests. Please try again later.' },
-        { 
+        {
           status: 429,
           headers: {
             'X-RateLimit-Remaining': remaining.toString(),
             'X-RateLimit-Reset': new Date(reset).toISOString(),
-          }
+          },
         }
       )
     }
-    
+
     const { searchParams } = new URL(request.url)
     const query = analyticsQuerySchema.parse({
       timeframe: searchParams.get('timeframe') || '7d',

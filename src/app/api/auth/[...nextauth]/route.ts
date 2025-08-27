@@ -1,8 +1,8 @@
-import NextAuth from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { PrismaClient } from '@prisma/client'
-import GoogleProvider from 'next-auth/providers/google'
+import NextAuth from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
+import GoogleProvider from 'next-auth/providers/google'
 
 const prisma = new PrismaClient()
 
@@ -27,14 +27,15 @@ const handler = NextAuth({
           return decodeURIComponent(callbackUrl)
         }
       }
-      
-      if (url.startsWith("/")) return `${baseUrl}${url}`
+
+      if (url.startsWith('/')) return `${baseUrl}${url}`
       if (new URL(url).origin === baseUrl) return url
       return baseUrl + '/chat'
     },
     session: async ({ session, user }) => {
       if (session?.user && user) {
-        session.user.id = user.id
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(session.user as any).id = user.id
       }
       return session
     },

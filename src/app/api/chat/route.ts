@@ -1,44 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+
 import { getSessionUser } from '@/lib/auth'
+import { callWebhook, handleApiError } from '@/lib/errors'
 import { chatRateLimit } from '@/lib/ratelimit'
-import { handleApiError, callWebhook } from '@/lib/errors'
 
 const chatMessageSchema = z.object({
-  message: z.string()
+  message: z
+    .string()
     .min(1, 'Message cannot be empty')
     .max(1000, 'Message cannot exceed 1000 characters')
     .trim(),
-  conversationId: z.string()
-    .uuid('Invalid conversation ID format')
+  conversationId: z.string().uuid('Invalid conversation ID format').optional(),
+  context: z
+    .object({
+      page: z.string().url('Invalid page URL').optional(),
+      userAgent: z.string().max(500, 'User agent too long').optional(),
+    })
     .optional(),
-  context: z.object({
-    page: z.string().url('Invalid page URL').optional(),
-    userAgent: z.string().max(500, 'User agent too long').optional(),
-  }).optional(),
 })
 
 export async function POST(request: NextRequest) {
   try {
     // Check authentication first
     const user = await getSessionUser(request)
-    
+
     // Rate limit check
     const { success, remaining, reset } = await chatRateLimit.limit(user.id)
-    
+
     if (!success) {
       return NextResponse.json(
         { error: 'Too many messages. Please try again later.' },
-        { 
+        {
           status: 429,
           headers: {
             'X-RateLimit-Remaining': remaining.toString(),
             'X-RateLimit-Reset': new Date(reset).toISOString(),
-          }
+          },
         }
       )
     }
-    
+
     const body = await request.json()
     const { message, conversationId, context } = chatMessageSchema.parse(body)
 
@@ -65,10 +67,10 @@ export async function POST(request: NextRequest) {
 
     // Mock response for now
     const responses = [
-      "I understand your question. Let me help you with that.",
+      'I understand your question. Let me help you with that.',
       "That's a great point. Here's what I recommend...",
-      "Based on your request, I can suggest a few approaches.",
-      "Let me break this down for you step by step.",
+      'Based on your request, I can suggest a few approaches.',
+      'Let me break this down for you step by step.',
       "I'd be happy to help clarify that for you.",
     ]
 
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 800))
+    await new Promise((resolve) => setTimeout(resolve, 800))
 
     return NextResponse.json(mockResponse)
   } catch (error) {

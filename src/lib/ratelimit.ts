@@ -38,27 +38,27 @@ class InMemoryRateLimit {
   async limit(identifier: string, windowMs: number, maxRequests: number) {
     const now = Date.now()
     const windowStart = now - windowMs
-    
+
     if (!this.requests.has(identifier)) {
       this.requests.set(identifier, [])
     }
-    
+
     const userRequests = this.requests.get(identifier)!
-    
+
     // Clean old requests
-    const validRequests = userRequests.filter(time => time > windowStart)
-    
+    const validRequests = userRequests.filter((time) => time > windowStart)
+
     if (validRequests.length >= maxRequests) {
       return { success: false, reset: windowStart + windowMs }
     }
-    
+
     validRequests.push(now)
     this.requests.set(identifier, validRequests)
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       remaining: maxRequests - validRequests.length,
-      reset: windowStart + windowMs 
+      reset: windowStart + windowMs,
     }
   }
 }
@@ -67,7 +67,7 @@ const memoryLimit = new InMemoryRateLimit()
 
 // Fallback rate limiter for development
 export async function simpleRateLimit(
-  identifier: string, 
+  identifier: string,
   maxRequests: number = 100,
   windowMs: number = 60 * 60 * 1000 // 1 hour
 ) {

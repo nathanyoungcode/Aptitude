@@ -15,10 +15,7 @@ export class WebhookError extends Error {
 export function handleApiError(error: unknown): NextResponse {
   // Authentication errors
   if (error instanceof AuthError) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.status }
-    )
+    return NextResponse.json({ error: error.message }, { status: error.status })
   }
 
   // Zod validation errors
@@ -26,7 +23,7 @@ export function handleApiError(error: unknown): NextResponse {
     return NextResponse.json(
       {
         error: 'Invalid request data',
-        details: error.errors.map(err => ({
+        details: error.issues.map((err: any) => ({
           field: err.path.join('.'),
           message: err.message,
           received: err.received,
@@ -54,10 +51,7 @@ export function handleApiError(error: unknown): NextResponse {
 
   // Generic server errors
   console.error('Unhandled API error:', error)
-  return NextResponse.json(
-    { error: 'Internal server error' },
-    { status: 500 }
-  )
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 }
 
 export async function callWebhook(
@@ -70,50 +64,51 @@ export async function callWebhook(
   const makeRequest = async (isRetry: boolean = false): Promise<any> => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
-    
+
     try {
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
       })
-      
+
       clearTimeout(timeoutId)
-      
+
       // Check for gateway errors that should be retried
       if (!response.ok) {
-        const shouldRetry = retryOnGatewayError && 
-                          !isRetry && 
-                          (response.status === 502 || response.status === 504)
-        
+        const shouldRetry =
+          retryOnGatewayError &&
+          !isRetry &&
+          (response.status === 502 || response.status === 504)
+
         if (shouldRetry) {
           console.warn(`${context} returned ${response.status}, retrying...`)
           // Wait 1 second before retry
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          await new Promise((resolve) => setTimeout(resolve, 1000))
           return makeRequest(true)
         }
-        
+
         let errorDetails
         try {
           errorDetails = await response.json()
         } catch {
           errorDetails = { message: response.statusText }
         }
-        
+
         throw new WebhookError(
           response.status,
           `${context} failed: ${errorDetails.message || response.statusText}`,
           errorDetails
         )
       }
-      
+
       return await response.json()
     } catch (error) {
       clearTimeout(timeoutId)
-      
+
       if (error instanceof WebhookError) {
         throw error
       }
-      
+
       // Handle abort/timeout
       if (error instanceof Error && error.name === 'AbortError') {
         throw new WebhookError(
@@ -122,22 +117,23 @@ export async function callWebhook(
           { timeout: true }
         )
       }
-      
+
       // Network or parsing errors
-      throw new WebhookError(
-        503,
-        `${context} service unavailable`,
-        { originalError: error instanceof Error ? error.message : 'Unknown error' }
-      )
+      throw new WebhookError(503, `${context} service unavailable`, {
+        originalError: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
-  
+
   return makeRequest()
 }
 
 // Import AuthError here to avoid circular dependency
 export class AuthError extends Error {
-  constructor(message: string, public status: number = 401) {
+  constructor(
+    message: string,
+    public status: number = 401
+  ) {
     super(message)
     this.name = 'AuthError'
   }

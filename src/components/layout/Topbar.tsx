@@ -1,19 +1,20 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Bell, Command, LogOut, Search, Settings, User } from 'lucide-react'
+import { signIn, signOut, useSession } from 'next-auth/react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Bell, Search, User, Settings, LogOut, Command } from 'lucide-react'
-import { useSession, signOut, signIn } from 'next-auth/react'
+import { Input } from '@/components/ui/input'
 
 export function Topbar() {
   const { data: session, status } = useSession()
@@ -62,7 +63,10 @@ export function Topbar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
+                  <AvatarImage
+                    src={session.user?.image || ''}
+                    alt={session.user?.name || 'User'}
+                  />
                   <AvatarFallback>
                     {session.user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </AvatarFallback>
@@ -97,9 +101,7 @@ export function Topbar() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button onClick={() => signIn()}>
-            Sign in
-          </Button>
+          <Button onClick={() => signIn()}>Sign in</Button>
         )}
       </div>
     </header>

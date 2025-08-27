@@ -1,13 +1,21 @@
 'use client'
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Menu, Home, MessageCircle, Settings, User, ChevronDown } from 'lucide-react'
-import Link from 'next/link'
 import { useState } from 'react'
+import Link from 'next/link'
+import {
+  ChevronDown,
+  Home,
+  Menu,
+  MessageCircle,
+  Settings,
+  User,
+} from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -51,7 +59,10 @@ function SidebarContent() {
                 <span>450 / 1000</span>
               </div>
               <div className="w-full bg-background rounded-full h-2">
-                <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }} />
+                <div
+                  className="bg-primary h-2 rounded-full"
+                  style={{ width: '45%' }}
+                />
               </div>
             </div>
           </div>
@@ -74,7 +85,11 @@ export function Sidebar() {
       {/* Mobile sidebar */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild className="md:hidden">
-          <Button variant="ghost" size="icon" className="fixed top-3 left-3 z-40">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed top-3 left-3 z-40"
+          >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>

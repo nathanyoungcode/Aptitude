@@ -1,10 +1,17 @@
 'use client'
 
-import { signIn, getProviders } from 'next-auth/react'
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Github } from 'lucide-react'
+import { getProviders, signIn } from 'next-auth/react'
+
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 interface Provider {
   id: string
@@ -15,7 +22,9 @@ interface Provider {
 }
 
 export default function SignInPage() {
-  const [providers, setProviders] = useState<Record<string, Provider> | null>(null)
+  const [providers, setProviders] = useState<Record<string, Provider> | null>(
+    null
+  )
 
   useEffect(() => {
     const setAuthProviders = async () => {
@@ -34,9 +43,7 @@ export default function SignInPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue
-          </CardDescription>
+          <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {Object.values(providers).map((provider) => (

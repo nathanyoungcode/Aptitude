@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { MoreVertical, Paperclip, Send } from 'lucide-react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Send, Paperclip, MoreVertical } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 
 const mockMessages = [
   {
@@ -26,7 +27,8 @@ const mockMessages = [
   {
     id: 3,
     sender: 'Assistant',
-    message: 'I\'d be happy to help you set up your dashboard. What specific features are you looking to configure?',
+    message:
+      "I'd be happy to help you set up your dashboard. What specific features are you looking to configure?",
     timestamp: '10:31 AM',
     isBot: true,
   },
@@ -43,7 +45,10 @@ export default function ChatPage() {
       id: messages.length + 1,
       sender: 'You',
       message: newMessage,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
       isBot: false,
     }
 
@@ -56,10 +61,13 @@ export default function ChatPage() {
         id: messages.length + 2,
         sender: 'Assistant',
         message: 'Thanks for your message! This is a simulated response.',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
         isBot: true,
       }
-      setMessages(prev => [...prev, botMessage])
+      setMessages((prev) => [...prev, botMessage])
     }, 1000)
   }
 
@@ -175,7 +183,10 @@ export default function ChatPage() {
                   }}
                   className="flex-1"
                 />
-                <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>

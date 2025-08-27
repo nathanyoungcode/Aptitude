@@ -16,7 +16,7 @@ async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `/api${endpoint}`
-  
+
   const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
