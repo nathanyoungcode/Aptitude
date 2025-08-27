@@ -8,13 +8,13 @@ const prisma = new PrismaClient()
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication first
     const user = await getSessionUser(request)
     
-    const conversationId = params.id
+    const { id: conversationId } = await params
 
     // Get conversation with messages
     const conversation = await prisma.conversation.findFirst({
@@ -58,13 +58,13 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication first
     const user = await getSessionUser(request)
     
-    const conversationId = params.id
+    const { id: conversationId } = await params
 
     // Delete conversation (messages will be deleted due to cascade)
     const deletedConversation = await prisma.conversation.deleteMany({

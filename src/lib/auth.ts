@@ -1,5 +1,8 @@
 import { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export class AuthError extends Error {
   constructor(
@@ -21,7 +24,32 @@ export interface SessionUser {
 export async function getSessionUser(
   request: NextRequest
 ): Promise<SessionUser> {
-  // Get token from Authorization header or cookie
+  // Try NextAuth session via cookie
+  try {
+    const sessionToken = request.cookies.get('next-auth.session-token')?.value || 
+                        request.cookies.get('__Secure-next-auth.session-token')?.value
+
+    if (sessionToken) {
+      // Look up session in database
+      const session = await prisma.session.findUnique({
+        where: { sessionToken },
+        include: { user: true }
+      })
+
+      if (session && session.expires > new Date() && session.user) {
+        return {
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.name || undefined,
+          role: undefined
+        }
+      }
+    }
+  } catch (error) {
+    console.log('NextAuth session lookup failed, trying JWT fallback')
+  }
+
+  // Fallback to JWT token authentication
   const authHeader = request.headers.get('authorization')
   const token =
     authHeader?.replace('Bearer ', '') ||
