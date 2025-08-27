@@ -19,17 +19,24 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    session: async ({ session, token }) => {
-      if (session?.user) {
-        session.user.id = token.sub!
+    async redirect({ url, baseUrl }) {
+      if (url.includes('/auth/signin') && url.includes('callbackUrl')) {
+        const urlObj = new URL(url)
+        const callbackUrl = urlObj.searchParams.get('callbackUrl')
+        if (callbackUrl) {
+          return decodeURIComponent(callbackUrl)
+        }
+      }
+      
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (new URL(url).origin === baseUrl) return url
+      return baseUrl + '/chat'
+    },
+    session: async ({ session, user }) => {
+      if (session?.user && user) {
+        session.user.id = user.id
       }
       return session
-    },
-    jwt: async ({ user, token }) => {
-      if (user) {
-        token.uid = user.id
-      }
-      return token
     },
   },
   pages: {
@@ -37,7 +44,7 @@ const handler = NextAuth({
     error: '/auth/error',
   },
   session: {
-    strategy: 'jwt',
+    strategy: 'database',
   },
 })
 
