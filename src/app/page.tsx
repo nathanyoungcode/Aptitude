@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-orange-400 to-blue-600">
       {/* Header */}
       <header className="relative z-10 p-8">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
