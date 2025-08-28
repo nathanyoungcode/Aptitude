@@ -14,7 +14,7 @@ const chatMessageSchema = z.object({
     .min(1, 'Message cannot be empty')
     .max(1000, 'Message cannot exceed 1000 characters')
     .trim(),
-  conversationId: z.string().uuid('Invalid conversation ID format').optional(),
+  conversationId: z.string().min(1, 'Conversation ID cannot be empty').optional(),
   context: z
     .object({
       page: z.string().url('Invalid page URL').optional(),
