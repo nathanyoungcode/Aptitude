@@ -1,11 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Lenis from 'lenis'
 
 export default function Home() {
+  const [isLoaded, setIsLoaded] = useState(false)
+
   useEffect(() => {
+    // Fade in colors after page load
+    const fadeTimer = setTimeout(() => {
+      setIsLoaded(true)
+    }, 300) // Start fade after 300ms
+
+    // Initialize Lenis
     // Initialize Lenis
     const lenis = new Lenis({
       duration: 1.2, // Animation duration
@@ -30,10 +38,17 @@ export default function Home() {
     // Cleanup
     return () => {
       lenis.destroy()
+      clearTimeout(fadeTimer)
     }
   }, [])
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-orange-400 to-blue-600">
+    <div className="min-h-screen relative bg-gradient-to-br from-yellow-300 via-orange-400 to-blue-600">
+      {/* White overlay that fades out - behind content */}
+      <div className={`absolute inset-0 bg-white transition-opacity duration-[3000ms] ease-out z-0 ${
+        isLoaded ? 'opacity-0' : 'opacity-100'
+      }`} />
+      
       {/* Glass Header */}
       <header className="fixed top-4 left-8 right-8 z-50">
         <div className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg rounded-2xl">
@@ -69,7 +84,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-8 pt-24 pb-32">
+      <main className="relative z-10 max-w-6xl mx-auto px-8 pt-24 pb-32">
         <div className="text-center mb-32">
           {/* Main Headline */}
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold text-black leading-none mb-8 tracking-tight">
