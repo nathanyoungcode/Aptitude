@@ -4,8 +4,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-orange-400 to-blue-600">
       {/* Glass Header */}
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="backdrop-blur-md bg-white/10 border-b border-white/20 shadow-lg">
+      <header className="fixed top-4 left-8 right-8 z-50">
+        <div className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg rounded-2xl">
           <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
             <h1 className="text-xl font-semibold text-black tracking-wide">n8n Chat</h1>
             
