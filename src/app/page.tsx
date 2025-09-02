@@ -55,30 +55,14 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
             <h1 className="text-xl font-semibold tracking-wide" style={{color: '#fafafa'}}>n8n Chat</h1>
             
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#" className="hover:focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors text-sm font-medium rounded-sm px-2 py-1" style={{color: '#a1a1aa', '--tw-ring-color': '#2563eb'}} onMouseEnter={e => e.target.style.color = '#fafafa'} onMouseLeave={e => e.target.style.color = '#a1a1aa'}>About</a>
-              <a href="#" className="hover:focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors text-sm font-medium rounded-sm px-2 py-1" style={{color: '#a1a1aa', '--tw-ring-color': '#2563eb'}} onMouseEnter={e => e.target.style.color = '#fafafa'} onMouseLeave={e => e.target.style.color = '#a1a1aa'}>Features</a>
-              <a href="#" className="hover:focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors text-sm font-medium rounded-sm px-2 py-1" style={{color: '#a1a1aa', '--tw-ring-color': '#2563eb'}} onMouseEnter={e => e.target.style.color = '#fafafa'} onMouseLeave={e => e.target.style.color = '#a1a1aa'}>Docs</a>
-              <a href="#" className="hover:focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors text-sm font-medium rounded-sm px-2 py-1" style={{color: '#a1a1aa', '--tw-ring-color': '#2563eb'}} onMouseEnter={e => e.target.style.color = '#fafafa'} onMouseLeave={e => e.target.style.color = '#a1a1aa'}>Contact</a>
-            </nav>
 
             {/* CTA Button */}
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/auth/signin"
-                className="px-6 py-2 text-black font-medium text-sm rounded-lg hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200" style={{backgroundColor: '#f59e0b', '--tw-ring-color': '#f59e0b'}} onMouseEnter={e => e.target.style.backgroundColor = '#d97706'} onMouseLeave={e => e.target.style.backgroundColor = '#f59e0b'}
-              >
-                Get Started
-              </Link>
-              
-              {/* Mobile Menu Button */}
-              <button className="md:hidden w-8 h-8 flex flex-col justify-center items-center space-y-1">
-                <span className="w-5 h-0.5 bg-stone-600"></span>
-                <span className="w-5 h-0.5 bg-stone-600"></span>
-                <span className="w-5 h-0.5 bg-stone-600"></span>
-              </button>
-            </div>
+            <Link
+              href="/auth/signin"
+              className="px-6 py-2 text-black font-medium text-sm rounded-lg hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200" style={{backgroundColor: '#f59e0b', '--tw-ring-color': '#f59e0b'}} onMouseEnter={e => e.target.style.backgroundColor = '#d97706'} onMouseLeave={e => e.target.style.backgroundColor = '#f59e0b'}
+            >
+              Get Started
+            </Link>
           </div>
         </div>
       </header>
@@ -99,22 +83,13 @@ export default function Home() {
 
         {/* Two Column Layout */}
         <div className="grid md:grid-cols-2 gap-16 md:gap-24 items-start">
-          {/* Left Column */}
+          {/* Left Column - Main Explanation */}
           <div className="space-y-8">
             <p className="text-xl md:text-2xl leading-relaxed font-light" style={{color: '#e4e4e7'}}>
-              We specialize in connecting your n8n workflows to conversational interfaces that create memorable user experiences.
+              Transform your n8n automation workflows into interactive chat experiences. 
+              No complex setup, no learning curves—just connect your webhook and start chatting.
             </p>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-12">
-            <div className="space-y-4">
-              <p className="text-lg leading-relaxed" style={{color: '#a1a1aa'}}>
-                n8n Chat was built for developers who want to transform their automation workflows into interactive chat experiences. 
-                No complex setup, no learning curves—just connect your webhook and start chatting.
-              </p>
-            </div>
-
+            
             {/* CTA Button */}
             <div className="pt-8">
               <Link
@@ -124,113 +99,50 @@ export default function Home() {
                 onMouseEnter={e => e.target.style.backgroundColor = '#d97706'}
                 onMouseLeave={e => e.target.style.backgroundColor = '#f59e0b'}
               >
-                Connect to n8n
+                Get Started
                 <svg className="ml-3 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
             </div>
           </div>
+
+          {/* Right Column - How it works */}
+          <div className="space-y-8">
+            <h2 className="text-2xl md:text-3xl font-bold" style={{color: '#fafafa'}}>How it works</h2>
+            
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#3f3f46'}}>
+                  <span className="text-sm font-bold" style={{color: '#e4e4e7'}}>1</span>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold mb-2" style={{color: '#fafafa'}}>Create your n8n workflow</h4>
+                  <p className="text-sm" style={{color: '#a1a1aa'}}>Build any automation workflow in n8n with your preferred tools and services.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#3f3f46'}}>
+                  <span className="text-sm font-bold" style={{color: '#e4e4e7'}}>2</span>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold mb-2" style={{color: '#fafafa'}}>Add webhook endpoint</h4>
+                  <p className="text-sm" style={{color: '#a1a1aa'}}>Configure a webhook trigger in your n8n workflow to receive chat messages.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#3f3f46'}}>
+                  <span className="text-sm font-bold" style={{color: '#e4e4e7'}}>3</span>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold mb-2" style={{color: '#fafafa'}}>Connect and chat</h4>
+                  <p className="text-sm" style={{color: '#a1a1aa'}}>Paste your webhook URL into n8n Chat and start conversing with your workflows.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-
-        {/* Additional Content for Scrolling */}
-        <section className="max-w-6xl mx-auto px-8 py-32 space-y-24">
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold" style={{color: '#fafafa'}}>Simple Setup</h3>
-              <p className="text-lg leading-relaxed" style={{color: '#a1a1aa'}}>
-                Connect your n8n webhook in seconds. No complex configuration or lengthy onboarding process required.
-              </p>
-            </div>
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold" style={{color: '#fafafa'}}>Powerful Workflows</h3>
-              <p className="text-lg leading-relaxed" style={{color: '#a1a1aa'}}>
-                Transform any automation into an interactive conversation. Your workflows become accessible to everyone.
-              </p>
-            </div>
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold" style={{color: '#fafafa'}}>Instant Results</h3>
-              <p className="text-lg leading-relaxed" style={{color: '#a1a1aa'}}>
-                See your chat interface come alive immediately. Real-time responses from your n8n workflows.
-              </p>
-            </div>
-          </div>
-
-          <div className="text-center space-y-8">
-            <h2 className="text-4xl md:text-6xl font-bold leading-tight" style={{color: '#fafafa'}}>
-              Ready to transform your workflows?
-            </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{color: '#a1a1aa'}}>
-              Join developers who are already building amazing conversational experiences with their n8n automations.
-            </p>
-            <div className="pt-8">
-              <Link
-                href="/auth/signin"
-                className="inline-flex items-center px-12 py-4 text-xl font-semibold text-black hover:transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 tracking-wide rounded-lg shadow-sm hover:shadow-md"
-                style={{backgroundColor: '#f59e0b', '--tw-ring-color': '#f59e0b'}}
-                onMouseEnter={e => e.target.style.backgroundColor = '#d97706'}
-                onMouseLeave={e => e.target.style.backgroundColor = '#f59e0b'}
-              >
-                Start Building Today
-                <svg className="ml-3 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-
-          <div className="space-y-16">
-            <div className="text-center">
-              <h2 className="text-3xl md:text-5xl font-bold mb-12" style={{color: '#fafafa'}}>How it works</h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="space-y-8">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#3f3f46'}}>
-                    <span className="text-sm font-bold" style={{color: '#e4e4e7'}}>1</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-2" style={{color: '#fafafa'}}>Create your n8n workflow</h4>
-                    <p style={{color: '#a1a1aa'}}>Build any automation workflow in n8n with your preferred tools and services.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#3f3f46'}}>
-                    <span className="text-sm font-bold" style={{color: '#e4e4e7'}}>2</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-2" style={{color: '#fafafa'}}>Add webhook endpoint</h4>
-                    <p style={{color: '#a1a1aa'}}>Configure a webhook trigger in your n8n workflow to receive chat messages.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#3f3f46'}}>
-                    <span className="text-sm font-bold" style={{color: '#e4e4e7'}}>3</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-2" style={{color: '#fafafa'}}>Connect and chat</h4>
-                    <p style={{color: '#a1a1aa'}}>Paste your webhook URL into n8n Chat and start conversing with your workflows.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-2xl p-8 border" style={{backgroundColor: '#27272a', borderColor: '#3f3f46'}}>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                  </div>
-                  <div className="rounded-lg p-4 font-mono text-sm border" style={{backgroundColor: '#18181b', borderColor: '#3f3f46'}}>
-                    <div style={{color: '#a1a1aa'}}>POST webhook-url</div>
-                    <div className="mt-2" style={{color: '#fafafa'}}>{"{ \"message\": \"Hello workflow!\" }"}</div>
-                    <div className="mt-4" style={{color: '#a1a1aa'}}>Response:</div>
-                    <div style={{color: '#fafafa'}}>{"{ \"reply\": \"Workflow executed!\" }"}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
     </div>
   )

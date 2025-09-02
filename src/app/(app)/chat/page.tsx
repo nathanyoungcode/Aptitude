@@ -156,40 +156,9 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        {/* Sidebar */}
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-base">Conversations</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {conversations.length === 0 ? (
-              <p className="text-sm text-muted-foreground p-2">No conversations yet</p>
-            ) : (
-              conversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  onClick={() => loadConversation(conv.id)}
-                  className={`p-2 rounded-lg cursor-pointer ${
-                    currentConversation?.id === conv.id
-                      ? 'bg-primary/10 border border-primary/20'
-                      : 'hover:bg-muted'
-                  }`}
-                >
-                  <p className="text-sm font-medium truncate">
-                    {conv.title || 'New Conversation'}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {conv.lastMessage?.content || 'No messages'}
-                  </p>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
+      <div className="max-w-4xl mx-auto">
         {/* Chat Area */}
-        <Card className="md:col-span-3">
+        <Card>
           <CardHeader className="border-b">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
