@@ -1,85 +1,40 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { MoreVertical, Paperclip, Send } from 'lucide-react'
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { useState } from 'react'
+import { Send } from 'lucide-react'
 
 interface Message {
   id: string
   content: string
-  role: 'USER' | 'ASSISTANT' | 'SYSTEM'
-  timestamp: string
-}
-
-interface Conversation {
-  id: string
-  title: string | null
-  messages: Message[]
-  createdAt: string
-  updatedAt: string
-}
-
-interface ConversationListItem {
-  id: string
-  title: string | null
-  messageCount: number
-  lastMessage: {
-    content: string
-    timestamp: string
-    role: string
-  } | null
-  createdAt: string
-  updatedAt: string
+  role: 'user' | 'assistant'
+  timestamp: Date
 }
 
 export default function ChatPage() {
-  const [conversations, setConversations] = useState<ConversationListItem[]>([])
-  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null)
-  const [newMessage, setNewMessage] = useState('')
+  const [prompt, setPrompt] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showConversation, setShowConversation] = useState(false)
 
-  // Load conversations on mount
-  useEffect(() => {
-    loadConversations()
-  }, [])
-
-  const loadConversations = async () => {
-    try {
-      const response = await fetch('/api/conversations')
-      if (response.ok) {
-        const data = await response.json()
-        setConversations(data.conversations)
-      }
-    } catch (error) {
-      console.error('Failed to load conversations:', error)
-    }
-  }
-
-  const loadConversation = async (conversationId: string) => {
-    try {
-      const response = await fetch(`/api/conversations/${conversationId}`)
-      if (response.ok) {
-        const conversation = await response.json()
-        setCurrentConversation(conversation)
-      }
-    } catch (error) {
-      console.error('Failed to load conversation:', error)
-    }
-  }
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || isLoading) return
+  const handleSubmitPrompt = async () => {
+    if (!prompt.trim() || isLoading) return
 
     setIsLoading(true)
-    setError(null) // Clear any previous errors
-    const messageText = newMessage
-    setNewMessage('')
+    setError(null)
+    const userMessage = prompt
+    setPrompt('')
+
+    // Add user message and show conversation
+    const newUserMessage: Message = {
+      id: Date.now().toString(),
+      content: userMessage,
+      role: 'user',
+      timestamp: new Date()
+    }
+
+    setMessages([newUserMessage])
+    setShowConversation(true)
 
     try {
       const response = await fetch('/api/chat', {
@@ -88,198 +43,192 @@ export default function ChatPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: messageText,
-          conversationId: currentConversation?.id,
+          message: userMessage,
         }),
       })
 
       if (response.ok) {
         const data = await response.json()
         
-        // If this is a new conversation, load it
-        if (!currentConversation || currentConversation.id !== data.conversationId) {
-          await loadConversation(data.conversationId)
-          await loadConversations() // Refresh conversation list
-        } else {
-          // Update current conversation with new messages
-          setCurrentConversation(prev => prev ? {
-            ...prev,
-            messages: [
-              ...prev.messages,
-              {
-                id: data.userMessage.id,
-                content: data.userMessage.message,
-                role: 'USER' as const,
-                timestamp: data.userMessage.timestamp,
-              },
-              {
-                id: data.assistantMessage.id,
-                content: data.assistantMessage.message,
-                role: 'ASSISTANT' as const,
-                timestamp: data.assistantMessage.timestamp,
-              }
-            ]
-          } : null)
+        // Add assistant response
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: data.message || 'Response from your n8n workflow',
+          role: 'assistant',
+          timestamp: new Date()
         }
+
+        setMessages(prev => [...prev, assistantMessage])
       } else {
         setError('Failed to send message. Please try again.')
-        setNewMessage(messageText) // Restore the message
+        setPrompt(userMessage)
       }
     } catch (error) {
       setError('Network error. Please check your connection.')
-      setNewMessage(messageText) // Restore the message
+      setPrompt(userMessage)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const startNewConversation = () => {
-    setCurrentConversation(null)
+  const startNewPrompt = () => {
+    setMessages([])
+    setShowConversation(false)
+    setPrompt('')
+    setError(null)
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Chat</h1>
-          <p className="text-muted-foreground">
-            Get help from our AI assistant
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={startNewConversation}>
-            New Chat
-          </Button>
-          <Button variant="outline" size="icon">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        </div>
+    <div className="min-h-screen relative" style={{backgroundColor: '#18181b'}}>
+      {/* Navigation back to home */}
+      <div className="absolute top-6 left-6 z-10">
+        <button 
+          onClick={() => window.location.href = '/'}
+          className="text-sm px-4 py-2 rounded-lg transition-colors hover:bg-zinc-800"
+          style={{color: '#a1a1aa'}}
+        >
+          ← Back to Home
+        </button>
       </div>
 
-      <div className="max-w-4xl mx-auto">
-        {/* Chat Area */}
-        <Card>
-          <CardHeader className="border-b">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>AI</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="text-base">AI Assistant</CardTitle>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="secondary" className="text-xs">
-                    Online
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    Usually responds in a few seconds
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="p-0">
-            {/* Messages */}
-            <div className="h-[400px] overflow-y-auto p-4 space-y-4">
-              {!currentConversation ? (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">Select a conversation or start a new one</p>
-                </div>
-              ) : (
-                currentConversation.messages.map((message) => {
-                  const isBot = message.role === 'ASSISTANT'
-                  const timestamp = new Date(message.timestamp).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                  
-                  return (
-                    <div
-                      key={message.id}
-                      className={`flex ${isBot ? 'justify-start' : 'justify-end'}`}
-                    >
-                      <div
-                        className={`flex max-w-[80%] ${
-                          isBot ? 'flex-row' : 'flex-row-reverse'
-                        }`}
-                      >
-                        <Avatar className="h-6 w-6 mt-1">
-                          <AvatarFallback className="text-xs">
-                            {isBot ? 'AI' : 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div
-                          className={`mx-2 p-3 rounded-lg ${
-                            isBot
-                              ? 'bg-muted'
-                              : 'bg-primary text-primary-foreground'
-                          }`}
-                        >
-                          <p className="text-sm">{message.content}</p>
-                          <p
-                            className={`text-xs mt-1 ${
-                              isBot ? 'text-muted-foreground' : 'opacity-70'
-                            }`}
-                          >
-                            {timestamp}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="flex flex-row max-w-[80%]">
-                    <Avatar className="h-6 w-6 mt-1">
-                      <AvatarFallback className="text-xs">AI</AvatarFallback>
-                    </Avatar>
-                    <div className="mx-2 p-3 rounded-lg bg-muted">
-                      <p className="text-sm">Thinking...</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+      {!showConversation ? (
+        /* Prompt Interface */
+        <div className="flex items-center justify-center min-h-screen p-8">
+          <div className="w-full max-w-2xl">
+            {/* Main Heading */}
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{color: '#fafafa'}}>
+                What would you like
+                <br />
+                <span className="italic font-light">your workflow to do?</span>
+              </h1>
+              <p className="text-lg leading-relaxed" style={{color: '#a1a1aa'}}>
+                Ask your n8n workflow anything. Get instant responses.
+              </p>
             </div>
 
-            {/* Error Display */}
+            {/* Prompt Input */}
+            <div className="relative">
+              <textarea
+                placeholder="Type your question or request here..."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmitPrompt()
+                  }
+                }}
+                className="w-full p-6 text-lg rounded-2xl border resize-none focus:outline-none focus:ring-2 transition-all"
+                style={{
+                  backgroundColor: '#27272a',
+                  borderColor: '#3f3f46',
+                  color: '#fafafa',
+                  '--tw-ring-color': '#f59e0b'
+                }}
+                rows={4}
+                disabled={isLoading}
+              />
+              
+              <button
+                onClick={handleSubmitPrompt}
+                disabled={!prompt.trim() || isLoading}
+                className="absolute bottom-4 right-4 p-3 rounded-lg hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: '#f59e0b',
+                  '--tw-ring-color': '#f59e0b',
+                  color: '#000'
+                }}
+                onMouseEnter={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#d97706')}
+                onMouseLeave={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#f59e0b')}
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+
             {error && (
-              <div className="p-4 border-t border-b bg-destructive/10 text-destructive text-sm">
+              <div className="mt-4 p-4 rounded-lg" style={{backgroundColor: '#dc26261a', color: '#dc2626'}}>
                 {error}
               </div>
             )}
-
-            {/* Input */}
-            <div className="border-t p-4">
-              <div className="flex space-x-2">
-                <Button variant="ghost" size="icon">
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-                <Input
-                  placeholder="Type your message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      handleSendMessage()
-                    }
-                  }}
-                  className="flex-1"
-                  disabled={isLoading}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || isLoading}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
+          </div>
+        </div>
+      ) : (
+        /* Conversation View */
+        <div className="max-w-4xl mx-auto p-6 pt-20">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-2xl font-bold" style={{color: '#fafafa'}}>Conversation</h2>
+              <p className="text-sm" style={{color: '#a1a1aa'}}>Your n8n workflow response</p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <button
+              onClick={startNewPrompt}
+              className="px-4 py-2 text-sm rounded-lg border transition-colors"
+              style={{
+                borderColor: '#3f3f46',
+                color: '#a1a1aa',
+                backgroundColor: 'transparent'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = '#27272a'
+                e.currentTarget.style.color = '#fafafa'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = '#a1a1aa'
+              }}
+            >
+              New Prompt
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div className="space-y-6">
+            {messages.map((message) => (
+              <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-4 rounded-2xl ${
+                  message.role === 'user'
+                    ? 'text-black'
+                    : 'border'
+                }`}
+                style={{
+                  backgroundColor: message.role === 'user' ? '#f59e0b' : '#27272a',
+                  borderColor: message.role === 'assistant' ? '#3f3f46' : 'transparent',
+                  color: message.role === 'user' ? '#000' : '#fafafa'
+                }}>
+                  <p className="text-lg leading-relaxed">{message.content}</p>
+                  <p className="text-xs mt-2 opacity-70">
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+              </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] p-4 rounded-2xl border" style={{backgroundColor: '#27272a', borderColor: '#3f3f46'}}>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                    <span className="text-sm" style={{color: '#a1a1aa'}}>Thinking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
