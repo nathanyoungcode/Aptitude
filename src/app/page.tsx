@@ -53,7 +53,7 @@ export default function Home() {
       <header className="fixed top-4 left-8 right-8 z-50">
         <div className="backdrop-blur-md border shadow-lg rounded-2xl" style={{backgroundColor: 'rgba(39, 39, 42, 0.9)', borderColor: '#3f3f46'}}>
           <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
-            <h1 className="text-xl font-semibold tracking-wide" style={{color: '#fafafa'}}>n8n Chat</h1>
+            <h1 className="text-xl font-semibold tracking-wide" style={{color: '#fafafa'}}>Aptitude</h1>
             
 
             {/* CTA Button */}

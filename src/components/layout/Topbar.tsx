@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, Command, LogOut, Search, Settings, User } from 'lucide-react'
+import { Bell, Command, LogOut, Search, Settings, User, Menu, PanelLeft } from 'lucide-react'
 import { signIn, signOut, useSession } from 'next-auth/react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'

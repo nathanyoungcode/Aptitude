@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Send } from 'lucide-react'
+import { Send, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Message {
   id: string
@@ -79,155 +81,123 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen relative" style={{backgroundColor: '#18181b'}}>
-      {/* Navigation back to home */}
-      <div className="absolute top-6 left-6 z-10">
-        <button 
-          onClick={() => window.location.href = '/'}
-          className="text-sm px-4 py-2 rounded-lg transition-colors hover:bg-zinc-800"
-          style={{color: '#a1a1aa'}}
-        >
-          ← Back to Home
-        </button>
-      </div>
-
+    <div className="space-y-6">
       {!showConversation ? (
-        /* Prompt Interface */
-        <div className="flex items-center justify-center min-h-screen p-8">
-          <div className="w-full max-w-2xl">
-            {/* Main Heading */}
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{color: '#fafafa'}}>
-                What would you like
-                <br />
-                <span className="italic font-light">your workflow to do?</span>
-              </h1>
-              <p className="text-lg leading-relaxed" style={{color: '#a1a1aa'}}>
+        /* Chat Introduction */
+        <>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Chat</h1>
+              <p className="text-muted-foreground">
                 Ask your n8n workflow anything. Get instant responses.
               </p>
             </div>
-
-            {/* Prompt Input */}
-            <div className="relative">
-              <textarea
-                placeholder="Type your question or request here..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmitPrompt()
-                  }
-                }}
-                className="w-full p-6 text-lg rounded-2xl border resize-none focus:outline-none focus:ring-2 transition-all"
-                style={{
-                  backgroundColor: '#27272a',
-                  borderColor: '#3f3f46',
-                  color: '#fafafa',
-                  '--tw-ring-color': '#f59e0b'
-                }}
-                rows={4}
-                disabled={isLoading}
-              />
-              
-              <button
-                onClick={handleSubmitPrompt}
-                disabled={!prompt.trim() || isLoading}
-                className="absolute bottom-4 right-4 p-3 rounded-lg hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: '#f59e0b',
-                  '--tw-ring-color': '#f59e0b',
-                  color: '#000'
-                }}
-                onMouseEnter={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#d97706')}
-                onMouseLeave={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#f59e0b')}
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-
-            {error && (
-              <div className="mt-4 p-4 rounded-lg" style={{backgroundColor: '#dc26261a', color: '#dc2626'}}>
-                {error}
-              </div>
-            )}
           </div>
-        </div>
+
+          {/* Chat Input Card */}
+          <Card className="w-full max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle>What would you like your workflow to do?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                <textarea
+                  placeholder="Type your question or request here..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSubmitPrompt()
+                    }
+                  }}
+                  className="w-full min-h-[120px] p-4 text-base rounded-lg border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all"
+                  disabled={isLoading}
+                />
+                
+                <Button
+                  onClick={handleSubmitPrompt}
+                  disabled={!prompt.trim() || isLoading}
+                  className="absolute bottom-3 right-3"
+                  size="sm"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+
+              {error && (
+                <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
+                  {error}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
       ) : (
         /* Conversation View */
-        <div className="max-w-4xl mx-auto p-6 pt-20">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+        <>
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold" style={{color: '#fafafa'}}>Conversation</h2>
-              <p className="text-sm" style={{color: '#a1a1aa'}}>Your n8n workflow response</p>
+              <h1 className="text-3xl font-bold tracking-tight">Conversation</h1>
+              <p className="text-muted-foreground">
+                Your n8n workflow response
+              </p>
             </div>
-            <button
-              onClick={startNewPrompt}
-              className="px-4 py-2 text-sm rounded-lg border transition-colors"
-              style={{
-                borderColor: '#3f3f46',
-                color: '#a1a1aa',
-                backgroundColor: 'transparent'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = '#27272a'
-                e.currentTarget.style.color = '#fafafa'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.color = '#a1a1aa'
-              }}
-            >
-              New Prompt
-            </button>
+            <Button onClick={startNewPrompt} variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              New Chat
+            </Button>
           </div>
 
           {/* Messages */}
-          <div className="space-y-6">
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-4 rounded-2xl ${
-                  message.role === 'user'
-                    ? 'text-black'
-                    : 'border'
-                }`}
-                style={{
-                  backgroundColor: message.role === 'user' ? '#f59e0b' : '#27272a',
-                  borderColor: message.role === 'assistant' ? '#3f3f46' : 'transparent',
-                  color: message.role === 'user' ? '#000' : '#fafafa'
-                }}>
-                  <p className="text-lg leading-relaxed">{message.content}</p>
-                  <p className="text-xs mt-2 opacity-70">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="max-w-[80%] p-4 rounded-2xl border" style={{backgroundColor: '#27272a', borderColor: '#3f3f46'}}>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                      <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[70%] rounded-lg px-4 py-3 ${
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground ml-12'
+                          : 'bg-muted text-muted-foreground mr-12'
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      <p className="text-xs mt-2 opacity-70">
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
                     </div>
-                    <span className="text-sm" style={{color: '#a1a1aa'}}>Thinking...</span>
                   </div>
-                </div>
+                ))}
+                
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[70%] bg-muted rounded-lg px-4 py-3 mr-12">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                        <span className="text-sm text-muted-foreground">Thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   )
