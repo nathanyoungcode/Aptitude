@@ -65,7 +65,7 @@ export default function ChatPage() {
         setError('Failed to send message. Please try again.')
         setPrompt(userMessage)
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection.')
       setPrompt(userMessage)
     } finally {
