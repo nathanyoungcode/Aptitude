@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { getSessionUser } from '@/lib/auth'
-import { callWebhook, handleApiError } from '@/lib/errors'
-import { simpleRateLimit, userUpdateRateLimit } from '@/lib/ratelimit'
+import { handleApiError } from '@/lib/errors'
+import { userUpdateRateLimit } from '@/lib/ratelimit'
 
 const updateUserSchema = z.object({
   name: z
@@ -29,7 +29,7 @@ const updateUserSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Check authentication first
-    const user = await getSessionUser(request)
+    await getSessionUser(request)
 
     // Call your user service or n8n webhook
     // const webhookResponse = await callWebhook(

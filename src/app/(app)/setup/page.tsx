@@ -61,7 +61,7 @@ export default function SetupPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Setup & Use Cases</h1>
           <p className="text-muted-foreground">
-            Get started with Aptitude and explore what's possible
+            Get started with Aptitude and explore what&apos;s possible
           </p>
         </div>
         <Button variant="outline" asChild>
