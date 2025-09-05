@@ -76,27 +76,53 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Call your n8n webhook
+    // Get user's webhook URL from database
+    const userWithWebhook = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { webhookUrl: true, signingSecret: true }
+    })
+
+    if (!userWithWebhook?.webhookUrl) {
+      return NextResponse.json(
+        { error: 'Please configure your n8n webhook URL in settings first.' },
+        { status: 400 }
+      )
+    }
+
+    // Prepare payload with HMAC signing
+    const payload = {
+      event: 'chat.message',
+      data: {
+        message,
+        userId: user.id,
+        conversationId: conversation.id,
+        timestamp: new Date().toISOString(),
+        context
+      }
+    }
+
+    const body = JSON.stringify(payload)
+    const signature = userWithWebhook.signingSecret 
+      ? `sha256=${require('crypto').createHmac('sha256', userWithWebhook.signingSecret).update(body).digest('hex')}`
+      : undefined
+
+    // Call user's personal n8n webhook
     const webhookResponse = await callWebhook(
-      process.env.N8N_WEBHOOK_URL,
+      userWithWebhook.webhookUrl,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.N8N_API_SECRET}`,
+          'X-Event-Type': 'chat.message',
+          'X-Event-ID': require('crypto').randomUUID(),
           'X-User-ID': user.id,
+          ...(signature && { 'X-Signature': signature })
         },
-        body: JSON.stringify({
-          message,
-          conversationId: conversation.id,
-          context,
-          userId: user.id,
-          userEmail: user.email,
-        }),
+        body
       },
-      'n8n Chat service',
-      30000, // 30s timeout
-      true    // Retry on 502/504
+      'User n8n webhook',
+      30000,
+      true
     )
 
     // Save assistant response

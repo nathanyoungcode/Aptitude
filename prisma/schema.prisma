@@ -19,6 +19,8 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  webhookUrl    String?   // User's personal n8n webhook URL
+  signingSecret String?   // HMAC signing secret for security
   accounts      Account[]
   sessions      Session[]
   conversations Conversation[]
