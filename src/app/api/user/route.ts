@@ -75,10 +75,15 @@ export async function PATCH(request: NextRequest) {
     // Check authentication first
     const user = await getSessionUser(request)
 
-    // Rate limit check for updates
-    const { success, remaining, reset } = await userUpdateRateLimit.limit(
-      user.id
-    )
+    // Rate limit check for updates (skip if Redis not configured)
+    let success = true, remaining = 10, reset = Date.now() + 60000
+    
+    if (userUpdateRateLimit) {
+      const result = await userUpdateRateLimit.limit(user.id)
+      success = result.success
+      remaining = result.remaining
+      reset = result.reset
+    }
 
     if (!success) {
       return NextResponse.json(
