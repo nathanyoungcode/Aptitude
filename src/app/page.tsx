@@ -18,13 +18,6 @@ export default function Home() {
     const lenis = new Lenis({
       duration: 1.2, // Animation duration
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Custom easing curve
-      direction: 'vertical', // Scroll direction
-      gestureDirection: 'vertical', // Gesture direction
-      smooth: true,
-      mouseMultiplier: 1, // Mouse wheel sensitivity
-      smoothTouch: false, // Disable on touch devices (better performance)
-      touchMultiplier: 2,
-      infinite: false,
     })
 
     // RAF loop for Lenis
