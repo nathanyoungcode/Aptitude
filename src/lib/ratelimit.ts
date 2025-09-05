@@ -1,35 +1,39 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 
-// Create Redis instance
-const redis = Redis.fromEnv({
-  // Uses UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN from env
-})
+// Check if Redis is properly configured
+const isRedisConfigured = process.env.UPSTASH_REDIS_REST_URL && 
+                          process.env.UPSTASH_REDIS_REST_TOKEN && 
+                          process.env.UPSTASH_REDIS_REST_URL.startsWith('https://') &&
+                          !process.env.UPSTASH_REDIS_REST_URL.includes('your-redis')
+
+// Create Redis instance only if properly configured
+const redis = isRedisConfigured ? Redis.fromEnv() : null
 
 // Rate limiters for different endpoints
-export const globalRateLimit = new Ratelimit({
+export const globalRateLimit = redis ? new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(100, '1 h'), // 100 requests per hour
   analytics: true,
-})
+}) : null
 
-export const chatRateLimit = new Ratelimit({
+export const chatRateLimit = redis ? new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(30, '5 m'), // 30 messages per 5 minutes
   analytics: true,
-})
+}) : null
 
-export const analyticsRateLimit = new Ratelimit({
+export const analyticsRateLimit = redis ? new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(60, '1 h'), // 60 requests per hour
   analytics: true,
-})
+}) : null
 
-export const userUpdateRateLimit = new Ratelimit({
+export const userUpdateRateLimit = redis ? new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(10, '1 m'), // 10 updates per minute
   analytics: true,
-})
+}) : null
 
 // Fallback in-memory rate limiting for development
 class InMemoryRateLimit {
@@ -72,7 +76,7 @@ export async function simpleRateLimit(
   windowMs: number = 60 * 60 * 1000 // 1 hour
 ) {
   // Use Upstash if configured, otherwise fallback to memory
-  if (process.env.UPSTASH_REDIS_REST_URL) {
+  if (globalRateLimit) {
     const result = await globalRateLimit.limit(identifier)
     return {
       success: result.success,

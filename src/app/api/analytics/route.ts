@@ -15,10 +15,15 @@ export async function GET(request: NextRequest) {
     // Check authentication first
     const user = await getSessionUser(request)
 
-    // Rate limit check
-    const { success, remaining, reset } = await analyticsRateLimit.limit(
-      user.id
-    )
+    // Rate limit check (skip if Redis not configured)
+    let success = true, remaining = 100, reset = Date.now() + 3600000
+    
+    if (analyticsRateLimit) {
+      const result = await analyticsRateLimit.limit(user.id)
+      success = result.success
+      remaining = result.remaining
+      reset = result.reset
+    }
 
     if (!success) {
       return NextResponse.json(
