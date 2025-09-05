@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Call your n8n webhook
     const webhookResponse = await callWebhook(
-      process.env.N8N_WEBHOOK_URL + '/chat',
+      process.env.N8N_WEBHOOK_URL,
       {
         method: 'POST',
         headers: {
