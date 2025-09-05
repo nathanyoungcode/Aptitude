@@ -172,7 +172,7 @@ function SidebarContent({ isOpen = true, onToggle }: SidebarContentProps) {
                 )}
                 asChild
               >
-                <Link href={item.href} title={!isOpen ? item.name : undefined}>
+                <Link href={item.href || '#'} title={!isOpen ? item.name : undefined}>
                   <item.icon className={cn(
                     "h-4 w-4 transition-all duration-300",
                     isOpen ? "mr-2" : "mr-0"

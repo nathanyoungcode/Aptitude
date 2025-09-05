@@ -91,9 +91,9 @@ export default function Home() {
               <Link
                 href="/auth/signin"
                 className="inline-flex items-center px-8 py-4 text-lg font-semibold text-black hover:transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 tracking-wide rounded-lg shadow-sm hover:shadow-md"
-                style={{backgroundColor: '#f59e0b', '--tw-ring-color': '#f59e0b'}}
-                onMouseEnter={e => e.target.style.backgroundColor = '#d97706'}
-                onMouseLeave={e => e.target.style.backgroundColor = '#f59e0b'}
+                style={{backgroundColor: '#f59e0b'}}
+                onMouseEnter={e => (e.target as HTMLElement).style.backgroundColor = '#d97706'}
+                onMouseLeave={e => (e.target as HTMLElement).style.backgroundColor = '#f59e0b'}
               >
                 Get Started
                 <svg className="ml-3 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
