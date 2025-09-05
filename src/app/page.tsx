@@ -52,7 +52,10 @@ export default function Home() {
             {/* CTA Button */}
             <Link
               href="/auth/signin"
-              className="px-6 py-2 text-black font-medium text-sm rounded-lg hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200" style={{backgroundColor: '#f59e0b', '--tw-ring-color': '#f59e0b'}} onMouseEnter={e => e.target.style.backgroundColor = '#d97706'} onMouseLeave={e => e.target.style.backgroundColor = '#f59e0b'}
+              className="px-6 py-2 text-black font-medium text-sm rounded-lg hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200" 
+              style={{backgroundColor: '#f59e0b'}} 
+              onMouseEnter={e => (e.target as HTMLElement).style.backgroundColor = '#d97706'} 
+              onMouseLeave={e => (e.target as HTMLElement).style.backgroundColor = '#f59e0b'}
             >
               Get Started
             </Link>
